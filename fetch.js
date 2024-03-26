@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A2B4T3')
+    fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A347S9')
         .then(response => response.json())
         .then(apiData => {
             if (apiData.results && apiData.results[0].fund_portfolio_global_bond_sector_breakdown && apiData.results[0].fund_portfolio_global_bond_sector_breakdown.super) {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A2B4T3')
+    fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A347S9')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
@@ -258,7 +258,7 @@ function formatDate(dateStr) {
 
 function fetchDataAndUpdateChart(period) {
     const { dateFrom, dateTo } = getDateRangeForPeriod(period);
-    let apiUrl = `https://api.extraetf.com/customer-api/ic/chart/?isin=AT0000A2B4T3&data_type=nav`;
+    let apiUrl = `https://api.extraetf.com/customer-api/ic/chart/?isin=AT0000A347S9&data_type=nav`;
     if (dateFrom && dateTo) {
         apiUrl += `&date_from=${dateFrom}&date_to=${dateTo}`;
     }
@@ -350,3 +350,72 @@ function updateChart(chart, labels, data) {
 document.getElementById('month').addEventListener('click', () => handleButtonClick('month'));
 document.getElementById('year').addEventListener('click', () => handleButtonClick('year'));
 document.getElementById('alltime').addEventListener('click', () => handleButtonClick('alltime'));
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A347S9')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(apiData => {
+            // Check if the data contains the expected fund portfolio holdings
+            if (apiData.results && apiData.results[0].fund_portfolio_holdings) {
+                const fundHoldings = apiData.results[0].fund_portfolio_holdings;
+
+                // Find the container where the fund holdings will be displayed
+                const container = document.querySelector('.positions_content-grid');
+                container.innerHTML = ''; // Clear existing content
+
+                fundHoldings.forEach(holding => {
+                    // Create elements for each holding
+                    const holdingDiv = document.createElement('div');
+                    holdingDiv.className = 'text-size-regular pos_name';
+                    holdingDiv.textContent = holding.name;
+
+                    const percentageWrapper = document.createElement('div');
+                    percentageWrapper.className = 'percentage_wrapper';
+
+                    const indicatorComponent = document.createElement('div');
+                    indicatorComponent.className = 'indicator_component is-rounded-15';
+
+                    const indicatorLine = document.createElement('div');
+                    indicatorLine.className = 'indicator_line pos_line';
+                    indicatorLine.style.width = `${holding.weight}%`;
+
+                    const indicatorBg = document.createElement('div');
+                    indicatorBg.className = 'indicator_bg';
+
+                    const percentageText = document.createElement('div');
+                    percentageText.className = 'text-size-small pos_percentage';
+                    percentageText.textContent = `${holding.weight.toFixed(2)}%`;
+
+                    const countryDiv = document.createElement('div');
+                    countryDiv.className = 'text-size-regular pos_country';
+                    countryDiv.textContent = holding.country_code || 'N/A';
+
+                    const assetDiv = document.createElement('div');
+                    assetDiv.className = 'text-size-regular pos_asset';
+                    assetDiv.textContent = holding.type_name_full || 'N/A';
+
+                    // Append elements
+                    indicatorComponent.appendChild(indicatorLine);
+                    indicatorComponent.appendChild(indicatorBg);
+                    percentageWrapper.appendChild(indicatorComponent);
+                    percentageWrapper.appendChild(percentageText);
+
+                    container.appendChild(holdingDiv);
+                    container.appendChild(percentageWrapper);
+                    container.appendChild(countryDiv);
+                    container.appendChild(assetDiv);
+                });
+            } else {
+                console.error('Data does not contain fund portfolio holdings.');
+            }
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+});
