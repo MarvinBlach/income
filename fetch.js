@@ -1,163 +1,3 @@
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A347S9')
-        .then(response => response.json())
-        .then(apiData => {
-            if (apiData.results && apiData.results[0].fund_portfolio_global_bond_sector_breakdown && apiData.results[0].fund_portfolio_global_bond_sector_breakdown.super) {
-                const bondSectorBreakdown = apiData.results[0].fund_portfolio_global_bond_sector_breakdown.super;
-
-                const labels = bondSectorBreakdown.map(item => item.type_name);
-                const chartData = bondSectorBreakdown.map(item => item.value);
-                const backgroundColors = [
-                    'rgba(25, 35, 108, 1)',
-                    'rgba(25, 35, 108, 0.7)',
-                    'rgba(25, 35, 108, 0.5)',
-                    'rgba(25, 35, 108, 0.3)'
-                ]; // Adjust the colors as needed
-
-                const piechartHolder = document.querySelector('.piechart_holder');
-                piechartHolder.innerHTML = ''; // Clear existing content
-
-                bondSectorBreakdown.forEach((item, index) => {
-                    const holderDiv = document.createElement('div');
-                    holderDiv.className = 'piechart_percentage-holder';
-
-                    const circleDiv = document.createElement('div');
-                    circleDiv.className = 'circle pie_color';
-                    circleDiv.style.backgroundColor = backgroundColors[index % backgroundColors.length];
-
-                    const percentageDiv = document.createElement('div');
-                    percentageDiv.className = 'text-size-medium pie_percentage';
-                    percentageDiv.textContent = `${item.value.toFixed(2)}%`;
-
-                    const nameDiv = document.createElement('div');
-                    nameDiv.className = 'text-size-medium op_50 pie_name';
-                    nameDiv.textContent = item.type_name;
-
-                    holderDiv.appendChild(circleDiv);
-                    holderDiv.appendChild(percentageDiv);
-                    holderDiv.appendChild(nameDiv);
-
-                    piechartHolder.appendChild(holderDiv);
-                });
-
-                const ctx = document.getElementById('myDonutChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: chartData,
-                            backgroundColor: backgroundColors,
-                            borderColor: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '50%',
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            } else {
-                console.error('Data does not contain the bond sector breakdown.');
-            }
-        })
-        .catch(error => {
-            console.error('There has been a problem with your fetch operation:', error);
-        });
-});
-
-
-document.addEventListener('DOMContentLoaded', (event) => {
-    fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A347S9')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Check if 'results' and 'fund_portfolio_country_breakdown' exist
-            if(data.results && data.results[0].fund_portfolio_country_breakdown) {
-                const countryBreakdown = data.results[0].fund_portfolio_country_breakdown;
-                // Get the bond and stock data from the JSON
-                const bonds = countryBreakdown.bond;
-                const stocks = countryBreakdown.stock;
-                // Find the main container where the currencies will be displayed
-                const mainContainer = document.querySelector('.positions_content-first');
-
-                // Function to create, sort, and append currency elements to the main container
-                const appendCurrencyElements = (currencies, type) => {
-                    // Convert object entries to an array and sort by percentage
-                    const sortedCurrencies = Object.entries(currencies)
-                        .filter(([currencyCode, percentage]) => typeof percentage === 'number')
-                        .sort((a, b) => b[1] - a[1]); // Sort from largest to smallest percentage
-
-                    // Iterate over the sorted array
-                    sortedCurrencies.forEach(([currencyCode, percentage]) => {
-                        // Create the grid wrapper for each currency
-                        const gridWrapper = document.createElement('div');
-                        gridWrapper.className = 'positions_content-first-grid';
-
-                        const currencyTagElement = document.createElement('div');
-                        currencyTagElement.className = 'currency_tag';
-                        currencyTagElement.textContent = currencyCode;
-
-                        const currencyTextElement = document.createElement('div');
-                        currencyTextElement.className = 'text-size-regular currency_text';
-                        currencyTextElement.textContent = `${currencyCode} - ${type}`;
-
-                        const percentageWrapper = document.createElement('div');
-                        percentageWrapper.className = 'percentage_wrapper';
-
-                        const indicatorComponentElement = document.createElement('div');
-                        indicatorComponentElement.className = 'indicator_component is-rounded-15';
-
-                        const currencyLineElement = document.createElement('div');
-                        currencyLineElement.className = 'indicator_line currency_line';
-                        currencyLineElement.style.width = `${percentage}%`;
-
-                        const indicatorBgElement = document.createElement('div');
-                        indicatorBgElement.className = 'indicator_bg';
-
-                        const currencyPercentageElement = document.createElement('div');
-                        currencyPercentageElement.className = 'text-size-small currency_percentage';
-                        currencyPercentageElement.textContent = `${percentage.toFixed(2)}%`;
-
-                        // Append the line and background to the indicator component
-                        indicatorComponentElement.appendChild(currencyLineElement);
-                        indicatorComponentElement.appendChild(indicatorBgElement);
-
-                        // Append the indicator component and percentage to the percentage wrapper
-                        percentageWrapper.appendChild(indicatorComponentElement);
-                        percentageWrapper.appendChild(currencyPercentageElement);
-
-                        // Append the elements to the grid wrapper
-                        gridWrapper.appendChild(currencyTagElement);
-                        gridWrapper.appendChild(currencyTextElement);
-                        gridWrapper.appendChild(percentageWrapper);
-
-                        // Append the grid wrapper to the main container
-                        mainContainer.appendChild(gridWrapper);
-                    });
-                };
-
-                // Append bond currencies
-                appendCurrencyElements(bonds, 'Bond');
-                // Append stock currencies
-                appendCurrencyElements(stocks, 'Stock');
-            }
-        })
-        .catch(error => {
-            console.error('There has been a problem with your fetch operation:', error);
-        });
-});
-
 // Set global options for Chart.js
 Chart.defaults.color = 'white';
 
@@ -224,23 +64,32 @@ function updateChart(chart, labels, data) {
 
     function getDateRangeForPeriod(period) {
         const today = new Date();
-        const launchDate = '2019-11-13';
+        const launchDate = new Date(2023, 5, 31); // 31.05.2023
         let dateFrom, dateTo;
 
         switch (period) {
             case 'month':
-                dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0];
-                dateTo = today.toISOString().split('T')[0];
+                dateFrom = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+                dateTo = today;
                 break;
             case 'year':
-                dateFrom = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 365).toISOString().split('T')[0];
-                dateTo = today.toISOString().split('T')[0];
+                dateFrom = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+                dateTo = today;
                 break;
             case 'alltime':
                 dateFrom = launchDate;
-                dateTo = today.toISOString().split('T')[0];
+                dateTo = today;
                 break;
         }
+
+        // Ensure dateFrom is not earlier than 31.05.2023
+        if (dateFrom < launchDate) {
+            dateFrom = launchDate;
+        }
+
+        // Convert dates to ISO strings
+        dateFrom = dateFrom.toISOString().split('T')[0];
+        dateTo = dateTo.toISOString().split('T')[0];
 
         // Update date1, date2, and datum elements
         document.getElementById('date1').textContent = formatDate(dateFrom);
@@ -353,6 +202,7 @@ document.getElementById('alltime').addEventListener('click', () => handleButtonC
 
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Single API call to fetch data
     fetch('https://api.extraetf.com/customer-api/ic/detail/?isin=AT0000A347S9')
         .then(response => {
             if (!response.ok) {
@@ -361,64 +211,72 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(apiData => {
-            // Check if the data contains the expected fund portfolio holdings
-            if (apiData.results && apiData.results[0].fund_portfolio_holdings) {
-                const fundHoldings = apiData.results[0].fund_portfolio_holdings;
+            if (apiData.results && apiData.results[0]) {
+                const data = apiData.results[0];
+                // Use fund holdings to update the page
+                if (data.fund_portfolio_holdings) {
+                    const fundHoldings = data.fund_portfolio_holdings;
+                    const container = document.querySelector('.positions_content-grid');
+                    container.innerHTML = ''; // Clear existing content
 
-                // Find the container where the fund holdings will be displayed
-                const container = document.querySelector('.positions_content-grid');
-                container.innerHTML = ''; // Clear existing content
+                    fundHoldings.forEach(holding => {
+                        // Create elements for each holding
+                        const holdingDiv = document.createElement('div');
+                        holdingDiv.className = 'text-size-regular pos_name';
+                        holdingDiv.textContent = holding.name;
 
-                fundHoldings.forEach(holding => {
-                    // Create elements for each holding
-                    const holdingDiv = document.createElement('div');
-                    holdingDiv.className = 'text-size-regular pos_name';
-                    holdingDiv.textContent = holding.name;
+                        const percentageWrapper = document.createElement('div');
+                        percentageWrapper.className = 'percentage_wrapper';
 
-                    const percentageWrapper = document.createElement('div');
-                    percentageWrapper.className = 'percentage_wrapper';
+                        const indicatorComponent = document.createElement('div');
+                        indicatorComponent.className = 'indicator_component is-rounded-15';
 
-                    const indicatorComponent = document.createElement('div');
-                    indicatorComponent.className = 'indicator_component is-rounded-15';
+                        const indicatorLine = document.createElement('div');
+                        indicatorLine.className = 'indicator_line pos_line';
+                        indicatorLine.style.width = `${holding.weight * 10}%`;
 
-                    const indicatorLine = document.createElement('div');
-                    indicatorLine.className = 'indicator_line pos_line';
-                    indicatorLine.style.width = `${holding.weight}%`;
 
-                    const indicatorBg = document.createElement('div');
-                    indicatorBg.className = 'indicator_bg';
+                        const indicatorBg = document.createElement('div');
+                        indicatorBg.className = 'indicator_bg';
 
-                    const percentageText = document.createElement('div');
-                    percentageText.className = 'text-size-small pos_percentage';
-                    percentageText.textContent = `${holding.weight.toFixed(2)}%`;
+                        const percentageText = document.createElement('div');
+                        percentageText.className = 'text-size-small pos_percentage';
+                        percentageText.textContent = `${holding.weight.toFixed(2)}%`;
 
-                    const countryDiv = document.createElement('div');
-                    countryDiv.className = 'text-size-regular pos_country';
-                    countryDiv.textContent = holding.country_code || 'N/A';
+                        const countryDiv = document.createElement('div');
+                        countryDiv.className = 'text-size-regular pos_country';
+                        countryDiv.textContent = holding.country_code || 'N/A';
 
-                    const assetDiv = document.createElement('div');
-                    assetDiv.className = 'text-size-regular pos_asset';
-                    assetDiv.textContent = holding.type_name_full || 'N/A';
+                        const assetDiv = document.createElement('div');
+                        assetDiv.className = 'text-size-regular pos_asset';
+                        assetDiv.textContent = holding.type_name_full || 'N/A';
 
-                    // Append elements
-                    indicatorComponent.appendChild(indicatorLine);
-                    indicatorComponent.appendChild(indicatorBg);
-                    percentageWrapper.appendChild(indicatorComponent);
-                    percentageWrapper.appendChild(percentageText);
+                        // Append elements
+                        indicatorComponent.appendChild(indicatorLine);
+                        indicatorComponent.appendChild(indicatorBg);
+                        percentageWrapper.appendChild(indicatorComponent);
+                        percentageWrapper.appendChild(percentageText);
 
-                    container.appendChild(holdingDiv);
-                    container.appendChild(percentageWrapper);
-                    container.appendChild(countryDiv);
-                    container.appendChild(assetDiv);
-                });
-            } else {
-                console.error('Data does not contain fund portfolio holdings.');
+                        container.appendChild(holdingDiv);
+                        container.appendChild(percentageWrapper);
+                        container.appendChild(countryDiv);
+                        container.appendChild(assetDiv);
+                    });
+                } else {
+                    console.error('Data does not contain fund portfolio holdings.');
+                }
+                
+                // These functions should be defined to handle the respective parts of the page.
+                updateAllTimePerformance();
+                updateDate();
+                handleButtonClick('month');
             }
         })
         .catch(error => {
             console.error('There has been a problem with your fetch operation:', error);
         });
 });
+
 
 function updateDate() {
     // Find the element with the attribute 'stand-1'
@@ -428,12 +286,8 @@ function updateDate() {
         // Get the current date
         let date = new Date();
 
-        // Subtract one month
-
-//TO DO:
-    // - 1 day
-    // statt durch 100 durch 10 teilen
-        date.setMonth(date.getMonth());
+        // Subtract one day
+        date.setDate(date.getDate() - 1);
 
         // Format the date in 'dd.mm.yyyy' format
         let formattedDate = ('0' + date.getDate()).slice(-2) + '.' +
@@ -449,11 +303,12 @@ function updateDate() {
 
 document.addEventListener('DOMContentLoaded', (event) => {
     updateDate();
+    updateAllTimePerformance();
 });
 
 function updateAllTimePerformance() {
     // Define the API URL
-    const apiUrl = 'https://api.extraetf.com/customer-api/ic/chart/?isin=AT0000A347S9&data_type=nav&date_from=2019-11-13'; // Assuming '2019-11-13' is the inception date of the fund
+    const apiUrl = 'https://api.extraetf.com/customer-api/ic/chart/?isin=AT0000A347S9&data_type=nav&date_from=2022-05-31'; // Assuming '2019-11-13' is the inception date of the fund
 
     // Fetch the data
     fetch(apiUrl)
@@ -486,6 +341,4 @@ function updateAllTimePerformance() {
         });
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    updateAllTimePerformance();
-});
+
