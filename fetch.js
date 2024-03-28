@@ -171,10 +171,6 @@ function updateIndicatorClass(performance) {
     }
 }
 
-// On window load
-window.onload = function() {
-    handleButtonClick('month');
-};
 
 function calculateAndDisplayMinMaxValues(data) {
     const baseValue = 100;
@@ -304,6 +300,7 @@ function updateDate() {
 document.addEventListener('DOMContentLoaded', (event) => {
     updateDate();
     updateAllTimePerformance();
+    handleButtonClick('month');
 });
 
 function updateAllTimePerformance() {
