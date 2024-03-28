@@ -419,3 +419,73 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('There has been a problem with your fetch operation:', error);
         });
 });
+
+function updateDate() {
+    // Find the element with the attribute 'stand-1'
+    const element = document.querySelector('[stand-1]');
+
+    if (element) {
+        // Get the current date
+        let date = new Date();
+
+        // Subtract one month
+
+//TO DO:
+    // - 1 day
+    // statt durch 100 durch 10 teilen
+        date.setMonth(date.getMonth());
+
+        // Format the date in 'dd.mm.yyyy' format
+        let formattedDate = ('0' + date.getDate()).slice(-2) + '.' +
+                            ('0' + (date.getMonth() + 1)).slice(-2) + '.' +
+                            date.getFullYear();
+
+        // Set the text content of the element to the formatted date
+        element.textContent = formattedDate;
+    } else {
+        console.error('No element with attribute "stand-1" found.');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    updateDate();
+});
+
+function updateAllTimePerformance() {
+    // Define the API URL
+    const apiUrl = 'https://api.extraetf.com/customer-api/ic/chart/?isin=AT0000A347S9&data_type=nav&date_from=2019-11-13'; // Assuming '2019-11-13' is the inception date of the fund
+
+    // Fetch the data
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(apiData => {
+            if (apiData.results && apiData.results.nav.length > 0) {
+                // Extract the NAV (Net Asset Value) data
+                const navData = apiData.results.nav;
+                // Calculate performance from the first available data point to the last
+                const firstPrice = navData[0].value;
+                const lastPrice = navData[navData.length - 1].value;
+                let performance = ((lastPrice - firstPrice) / firstPrice) * 100;
+
+                // Determine the sign of the performance
+                const sign = performance > 0 ? '+' : '';
+                // Format the performance with the sign and replace the dot with a comma
+                const formattedPerformance = sign + performance.toFixed(2).replace('.', ',') + '%';
+
+                // Update all elements with the 'hs-full' attribute
+                const hsFullElements = document.querySelectorAll('[hs-full]');
+                hsFullElements.forEach(element => {
+                    element.textContent = formattedPerformance;
+                });
+            } else {
+                console.error('Data does not contain NAV results.');
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+}
+
+document.addEventListener('DOMContentLoaded', (event) => {
+    updateAllTimePerformance();
+});
