@@ -64,7 +64,7 @@ function updateChart(chart, labels, data) {
 
     function getDateRangeForPeriod(period) {
         const today = new Date();
-        const launchDate = new Date(2023, 5, 31); // 31.05.2023
+        const launchDate = new Date(2023, 4, 32); // 31.05.2023
         let dateFrom, dateTo;
 
         switch (period) {
